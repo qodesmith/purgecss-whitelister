@@ -1,0 +1,20 @@
+{
+  "name": "purgecss-whitelister",
+  "version": "1.0.0",
+  "description": "A utility for creating whitelists of CSS selectors for use with Purgecss.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "''"
+  },
+  "author": "Qodesmith",
+  "license": "MIT",
+  "dependencies": {
+    "css-what": "^2.1.0",
+    "glob": "^7.1.2",
+    "list-css-selectors": "^1.0.2"
+  }
+}
