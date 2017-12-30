@@ -65,7 +65,7 @@ const webpackConfig = {
   // ...a whole buncha stuffs up here...
 
   plugins: [
-    PurgecssPlugin({
+    new PurgecssPlugin({
       keyframes: false, // https://goo.gl/bACbDW
       styleExtensions: ['.css'],
       paths: glob.sync([
