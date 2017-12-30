@@ -10,7 +10,7 @@ While rebuilding my [personal site](http://aaroncordova.xyz) in React and using 
 
 ## Installation
 
-Via npm:
+Via [npm](https://www.npmjs.com/package/purgecss-whitelister):
 
 ```bash
 npm i purgecss-whitelister
