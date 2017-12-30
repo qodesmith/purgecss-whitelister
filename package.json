@@ -15,6 +15,6 @@
   "dependencies": {
     "css-what": "^2.1.0",
     "glob": "^7.1.2",
-    "list-css-selectors": "^1.0.2"
+    "list-css-selectors": "^1.1.0"
   }
 }
