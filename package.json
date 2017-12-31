@@ -1,6 +1,6 @@
 {
   "name": "purgecss-whitelister",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A utility for creating whitelists of CSS selectors for use with Purgecss.",
   "main": "index.js",
   "scripts": {
