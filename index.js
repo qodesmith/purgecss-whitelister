@@ -1,19 +1,12 @@
 const listSelectors = require('list-css-selectors');
+const sanitizeArgs = require('list-css-selectors/sanitizeArgs');
+const flattenArray = require('list-css-selectors/flattenArray');
 const cssWhat = require('css-what');
 const glob = require('glob');
 
 function makeWhitelist(filenames) {
-  if (!Array.isArray(filenames)) filenames = [filenames];
-  if (!filenames.length) throw 'You gave me an empty array. I feel so empty inside...';
-  if (filenames.some(name => !name.split)) throw `Oops! Something passed wasn't a string.`;
-
-  // If globs were passed, boil everything down to a flat array of absolute paths.
-  filenames = flattenArray(filenames.map(name => glob.sync(name, { absolute: true })));
-  if (!filenames.length) {
-    console.log('\n\nNo matching files found for whitelisting.');
-    console.log('Proceeding with an empty array.\n\n');
-    return [];
-  }
+  filenames = sanitizeArgs(filenames);
+  if (!filenames.length) return [];
 
   const selectorErrors = [];
   const selectors = listSelectors(filenames);
@@ -42,23 +35,6 @@ function makeWhitelist(filenames) {
 
   const flatWhitelist = flattenArray(whitelist);
   return Array.from(new Set(flatWhitelist)); // Remove duplicates.
-}
-
-function flattenArray(arr) {
-  const isArray = Array.isArray(arr);
-  if (!isArray) return arr;
-
-  let finalArray = [];
-
-  arr.forEach(thing => {
-    if (isArray) {
-      finalArray = finalArray.concat(flattenArray(thing));
-    } else {
-      finalArray.push(thing);
-    }
-  });
-
-  return finalArray;
 }
 
 module.exports = makeWhitelist;
