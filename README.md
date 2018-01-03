@@ -41,35 +41,27 @@ const whitelister = require('purgecss-whitelister');
 // Example 1 - simple string
 whitelister('./relative/path/to/my/styles.css');
 
-/* ^ That's good, this is better */
-const stylesPath = resolve(resolve(), './relative/path/to/my/styles.css');
-whitelister(stylesPath);
-
-
 // Example 2 - array of strings
-const locations = ['./styles1.css', './styles2.css'];
-whitelister(locations);
+whitelister(['./styles1.css', './styles2.css']);
 
-/* ^ Ahem, path.resolve plz */
-const pathyLocations = locations.map(loc => resolve(resolve(), loc));
-whitelister(pathyLocations);
+// Example 3 - globby strings
+whitelister('./3rd/party/library/*.css');
 
-
-// Example 3 - globby strings (or an array of them, your choice)
-const globbyPath = resolve(resolve(), './3rd/party/library/*.css');
-whitelister(globbyPath);
+// Example 4 - array of globby strings
+whitelister([
+  './node_modules/lib1/*.css',
+  './node_modules/lib2/*.css'
+])
 ```
 
 ## Webpack Example
 
 This is essentially what I'm using in my `webpack.config.js` file:
 ```javascript
-const whitelister = require(purgecss-whitelister);
+const whitelister = require('purgecss-whitelister');
 const PurgecssPlugin = require('purgecss-webpack-plugin');
 const glob = require('glob-all')
 const { resolve } = require('path');
-
-const whitelist = whitelister(resolve(resolve(), 'node_modules/typer-js/typer.css'));
 
 const webpackConfig = {
 
@@ -85,7 +77,7 @@ const webpackConfig = {
       ]),
 
       // `whiltelist` needed to ensure Typer classes stay in the bundle.
-      whitelist: whitelist,
+      whitelist: whitelister('node_modules/typer-js/typer.css');,
       extractors: [
         {
           // https://goo.gl/hr6mdb
