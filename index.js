@@ -10,22 +10,22 @@ function makeWhitelist(filenames) {
 
   const selectorErrors = [];
   const selectors = listSelectors(filenames);
-  const whitelist = selectors.map(selector => {
-    let name;
+  const whitelist = [];
 
+  selectors.map(selector => {
     try {
-      const what = cssWhat(selector);
-      name = what[0].map(obj => {
-        if (obj.type.includes('pseudo')) return;
-        if (obj.type === 'tag') return obj.name;
-        return obj.value || obj.name;
+      cssWhat(selector).map(what => {
+        what.map(obj => {
+          if (obj.type.includes('pseudo')) return;
+          else if (obj.type === 'tag') whitelist.push(obj.name);
+          else if (obj.value) whitelist.push(obj.value);
+          else whitelist.push(obj.name);
+        });
       });
     } catch (e) {
       selectorErrors.push(selector);
     }
-
-    return name && name.filter(Boolean);
-  }).filter(Boolean);
+  });
 
   if (selectorErrors.length) {
     console.log('\n\nErrors with the following selectors:');
