@@ -44,6 +44,12 @@ function makeWhitelist(filenames, list) {
 /*
   Iterates through an array from the results of `cssWhat`
   and returns names without selector characters such as [., #, >], etc.
+
+  https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes
+  List of psuedo selectors that can contain other selectors:
+    * host
+    * host-context
+    * not
 */
 function extractNames(arr) {
   const newArray = arr.map(obj => {
