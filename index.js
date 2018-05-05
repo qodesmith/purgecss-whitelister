@@ -2,7 +2,6 @@ const listSelectors = require('list-css-selectors');
 const sanitizeArgs = require('list-css-selectors/sanitizeArgs');
 const flattenArray = require('list-css-selectors/flattenArray');
 const cssWhat = require('css-what');
-const glob = require('glob');
 
 
 /*
@@ -17,23 +16,23 @@ function makeWhitelist(filenames, list) {
   if (!filenames.length && !list) return [];
 
   const selectorErrors = [];
-  const selectors = list || listSelectors(filenames) || [];
+  const selectors = list || listSelectors(filenames);
   const whitelist = selectors.map(selector => {
-    let names;
+    let names = [];
 
     try {
-      const what = cssWhat(selector);
-      names = extractNames(what[0])
+      const what = cssWhat(selector); // This may throw an error. Hence the try/catch.
+      names = what.map(arr => extractNames(arr));
     } catch (e) {
       selectorErrors.push(selector);
     }
 
-    return names || [];
+    return names;
   });
 
   if (selectorErrors.length) {
     console.log(`\n\nErrors with the following selectors (${selectorErrors.length}):`);
-    selectorErrors.forEach(selector => console.log(`  ${selector}`));
+    selectorErrors.forEach(selector => console.log(`  * ${selector}`));
     console.log('\n\n');
   }
 
@@ -53,12 +52,14 @@ function makeWhitelist(filenames, list) {
 */
 function extractNames(arr) {
   const newArray = arr.map(obj => {
-    if (obj.type.includes('pseudo') && obj.data && obj.data.length) return extractNames(obj.data[0]);
+    if (obj.type.includes('pseudo') && obj.data && obj.data.length) {
+      return obj.data.map(arr => extractNames(arr));
+    }
     if (obj.type === 'tag') return obj.name;
     return obj.value || obj.name;
-  }).filter(Boolean);
+  });
 
-  return flattenArray(newArray);
+  return flattenArray(newArray).filter(Boolean);
 }
 
 module.exports = makeWhitelist;
