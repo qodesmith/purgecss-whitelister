@@ -14,6 +14,6 @@
   "license": "MIT",
   "dependencies": {
     "css-what": "^2.1.0",
-    "list-css-selectors": "^1.2.2"
+    "list-css-selectors": "^1.3.0"
   }
 }
