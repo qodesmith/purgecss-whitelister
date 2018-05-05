@@ -2,7 +2,6 @@ const listSelectors = require('list-css-selectors');
 const sanitizeArgs = require('list-css-selectors/sanitizeArgs');
 const flattenArray = require('list-css-selectors/flattenArray');
 const cssWhat = require('css-what');
-const glob = require('glob');
 
 function makeWhitelist(filenames) {
   filenames = sanitizeArgs(filenames);
