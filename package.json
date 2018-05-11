@@ -15,5 +15,8 @@
   "dependencies": {
     "css-what": "^2.1.0",
     "list-css-selectors": "^1.3.0"
+  },
+  "devDependencies": {
+    "scss-parser": "github:salesforce-ux/scss-parser"
   }
 }
