@@ -13,7 +13,6 @@
   "author": "Qodesmith",
   "license": "MIT",
   "dependencies": {
-    "css-what": "^2.1.0",
     "glob-all": "^3.1.0",
     "scss-parser": "^1.0.0"
   }

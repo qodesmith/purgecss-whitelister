@@ -1,6 +1,7 @@
-const { parse } = require('scss-parser')
+const { parse } = require('scss-parser') // https://github.com/salesforce-ux/scss-parser
 const { readFileSync } = require('fs')
 const globAll = require('glob-all')
+
 const shouldParse = ['rule', 'selector', 'block']
 const shouldKeep = ['id', 'class', 'attribute']
 const exts = ['css', 'sass', 'scss', 'less']
