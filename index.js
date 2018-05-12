@@ -1,109 +1,91 @@
-const listSelectors = require('list-css-selectors');
-const sanitizeArgs = require('list-css-selectors/sanitizeArgs');
-const flattenArray = require('list-css-selectors/flattenArray');
-const cssWhat = require('css-what');
-const attrs = ['equals', 'start', 'end', 'element', 'hyphen', 'any', 'not'];
+const { parse } = require('scss-parser') // https://github.com/salesforce-ux/scss-parser
+const { readFileSync } = require('fs')
+const globAll = require('glob-all')
 
+const shouldParse = ['rule', 'selector', 'block']
+const shouldKeep = ['id', 'class', 'attribute']
+const exts = ['css', 'sass', 'scss', 'less']
 
-/*
-  This function parses css file(s) for their selectors,
-  and massages those selectors into plain text words
-  so that Purgecss can successfully whitelist them.
+function makeWhitelist(filenames) {
+  filenames = sanitizeArgs(filenames)
+  if (!filenames.length) return []
 
-  Examples
-  --------
-  .some-class         => some-class
-  #some-id            => some-id
-  [an-attribute]      => an-attribute
-  [data-test='hello'] => data-test, hello
+  // Create a deep array, each level containing a list of selectors.
+  const deepArray = filenames.reduce((acc, filename) => {
+    // Do nothing for non-style files.
+    const ext = filename.split('.').pop()
+    if (!exts.includes(ext)) return acc
 
-  Arguments:
-    * `filenames` - An array of strings representing file names
-    * `list` - For testing purposes only, not officially part
-               of the API. You can manually pass a list of selectors
-               and avoid having `makeWhitelist` read file data.
-*/
-function makeWhitelist(filenames, list) {
-  filenames = !list && sanitizeArgs(filenames);
-  if (!filenames.length && !list) return [];
+    const fileContents = readFileSync(filename, 'utf-8')
+    const parsedData = parse(fileContents).value
+    const selectors = parseStyleAST(parsedData)
+    return acc.concat(selectors)
+  }, [])
 
-  const selectorErrors = [];
-  const selectors = list || listSelectors(filenames);
-  const whitelist = selectors.map(selector => {
-    let what = [];
+  // Flatten the array.
+  const flattenedArray = flattenArray(deepArray)
 
-    try {
-      what = cssWhat(selector);
-    } catch(e) {
-      selectorErrors.push({ selector, e });
-    }
+  // Return an array of unique selectors in alphabetical order.
+  return [...new Set(flattenedArray)].sort()
+}
 
-    return what.map(arr => extractNames(arr));
-  });
+function sanitizeArgs(arr) {
+  if (!Array.isArray(arr)) arr = [arr]
+  arr = arr.filter(Boolean)
 
-  if (selectorErrors.length) {
-    console.log(`\n\nErrors with the following selectors (${selectorErrors.length}):`);
-    console.log('----------------------------------------');
-
-    selectorErrors.forEach(({ selector, e }) => {
-      console.log('Selector:', selector);
-      console.log('Associated error:');
-      console.log(e);
-      console.log('');
-      console.log('*** *** *** *** ***');
-      console.log('');
-    });
+  // Avoids errors if an empty array, no arguments, or falsey things are passed.
+  if (!arr.length) {
+    console.log('\n\nNo items for processing. Moving right along...\n\n')
+    return []
   }
 
-  const flatWhitelist = flattenArray(whitelist);
-  return Array.from(new Set(flatWhitelist)); // Remove duplicates.
+  // Each thing in the array must be a string.
+  if (arr.some(s => typeof s !== 'string')) throw `Oops! Something passed wasn't a string.`
+
+  // Ensure absolute paths for filenames, especially if globs were passed.
+  arr = globAll.sync(arr, { absolute: true })
+
+  // If, at the end of it all, we have nothing, leave empty-handed.
+  if (!arr.length) {
+    console.log('\n\nNo matching files found.\n\n')
+    return []
+  }
+
+  return arr
 }
 
-/*
-  Iterates through an array from the results of `cssWhat`
-  and returns names without selector characters such as [., #, >], etc.
+function parseStyleAST(arr) {
+  return arr.reduce((acc, { type, value }) => {
 
-  https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes
-  List of psuedo selectors that can contain other selectors:
-    * host
-    * host-context
-    * not
-*/
-function extractNames(arr) {
-  const newArray = arr.map(({ type, name, value, action, data }) => {
-    if (type === 'attribute') {
-      // #id
-      if (name === 'id') return value;
+    // Trigger recursion for types that need it.
+    if (shouldParse.includes(type)) {
+      return acc.concat(parseStyleAST(value))
 
-      // .class
-      if (name === 'class') return value;
+    // Iterate through a type's values to extract selectors.
+    } else if (shouldKeep.includes(type)) {
+      return value
+        .reduce((acc, { type, value }) => {
+          return (type === 'identifier' && !!value) ?  acc.concat(value) : acc
+        }, acc)
 
-      // [attr]
-      if (action === 'exists') return name;
+    // Concatenate a type's value if no iteration is needed.
+    } else if (type === 'identifier' && !!value) {
+      return acc.concat(value)
 
-      /*
-        Example        Action
-        -----------------------
-        [attr=val]  | 'equals'
-        [attr^=val] | 'start'
-        [attr$=val] | 'end'
-        [attr~=val] | 'element'
-        [attr|=val] | 'hyphen'
-        [attr*=val] | 'any'
-        [attr!=val] | 'not'
-      */
-      if (attrs.includes(action)) return [name, value];
+    // No matches - acc is unchanged.
+    // This allows us to skip filtering out falsy's later.
+    } else {
+      return acc
     }
-
-    // tag
-    if (type === 'tag') return name;
-
-    // Pseudo stuffs - recursion!
-    // Type might be 'pseudo' or 'pseudo-element'.
-    if (type.includes('pseudo') && Array.isArray(data)) return data.map(arr => extractNames(arr));
-  });
-
-  return flattenArray(newArray).filter(Boolean);
+  }, [])
 }
 
-module.exports = makeWhitelist;
+function flattenArray(arr) {
+  if (!Array.isArray(arr)) return arr
+
+  return arr.reduce((acc, thing) => {
+    return Array.isArray(thing) ? acc.concat(flattenArray(thing)) : acc.concat(thing)
+  }, [])
+}
+
+module.exports = makeWhitelist
