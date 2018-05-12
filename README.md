@@ -11,7 +11,7 @@
 
 # Purgecss Whitelister
 
-Create whitelists dynamically to include your 3rd party library styles!
+Create whitelists dynamically to include your 3rd party library styles! Supports css, sass, and less.
 
 
 ## Why this package?
@@ -30,38 +30,45 @@ npm i purgecss-whitelister
 
 ## Usage
 
-`purgecss-whitelister` is meant to extract all the selectors used in a CSS file and create an array of names for whitelisting. This is very handy when you have a 3rd party library that you don't want annihilated from your bundle.
+`purgecss-whitelister` is meant to extract all the selectors used in a file and create an array of names for whitelisting. ***Works with css, sass, and less!*** This is very handy when you have a 3rd party library that you don't want annihilated from your bundle.
 
-Pass either a string, a globby string, or an array of either, representing the location(s) of the CSS file(s) you want to completely whitelist. Try using `path.resolve` if things are blowing up:
+Pass either a string, a globby string, or an array of either, representing the location(s) of the file(s) you want to completely whitelist.
+
+**NOTE:** `purgecss-whitelister` will internally ignore any files that don't have the following extensions: `css`, `sass`, `scss`, `less`.
 
 ```javascript
-const { resolve } = require('path');
-const whitelister = require('purgecss-whitelister');
+const { resolve } = require('path')
+const whitelister = require('purgecss-whitelister')
 
 // Example 1 - simple string
-whitelister('./relative/path/to/my/styles.css');
+whitelister('./relative/path/to/my/styles.css')
 
 // Example 2 - array of strings
-whitelister(['./styles1.css', './styles2.css']);
+whitelister(['./styles1.css', './styles2.scss'])
 
 // Example 3 - globby strings
-whitelister('./3rd/party/library/*.css');
+whitelister('./3rd/party/library/*.less')
 
 // Example 4 - array of globby strings
 whitelister([
   './node_modules/lib1/*.css',
-  './node_modules/lib2/*.css'
+  './node_modules/lib2/*.scss',
+  './node_modules/lib3/*.less'
 ])
+
+// Example 5 - ALL THE THINGS
+//
+whitelister('./node_modules/cool-library/styles/*.*')
 ```
 
 ## Webpack Example
 
 This is essentially what I'm using in my `webpack.config.js` file:
 ```javascript
-const whitelister = require('purgecss-whitelister');
-const PurgecssPlugin = require('purgecss-webpack-plugin');
+const whitelister = require('purgecss-whitelister')
+const PurgecssPlugin = require('purgecss-webpack-plugin')
 const glob = require('glob-all')
-const { resolve } = require('path');
+const { resolve } = require('path')
 
 const webpackConfig = {
 
