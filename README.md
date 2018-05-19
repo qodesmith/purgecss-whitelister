@@ -37,7 +37,6 @@ Pass either a string, a globby string, or an array of either, representing the l
 **NOTE:** `purgecss-whitelister` will internally ignore any files that don't have the following extensions: `css`, `sass`, `scss`, `less`.
 
 ```javascript
-const { resolve } = require('path')
 const whitelister = require('purgecss-whitelister')
 
 // Example 1 - simple string
