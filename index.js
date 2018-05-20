@@ -1,9 +1,10 @@
-const { parse } = require('scss-parser') // https://github.com/salesforce-ux/scss-parser
+// const { parse } = require('scss-parser') // https://github.com/salesforce-ux/scss-parser
+const { parse } = require('gonzales-pe')
 const { readFileSync } = require('fs')
 const globAll = require('glob-all')
 
-const shouldParse = ['rule', 'selector', 'block']
-const shouldKeep = ['id', 'class', 'attribute']
+const shouldParse = ['ruleset', 'selector', 'block']
+const shouldKeep = ['id', 'class', 'attribute', 'typeSelector']
 const exts = ['css', 'sass', 'scss', 'less']
 
 function makeWhitelist(filenames) {
@@ -17,9 +18,17 @@ function makeWhitelist(filenames) {
     if (!exts.includes(ext)) return acc
 
     const fileContents = readFileSync(filename, 'utf-8')
-    const parsedData = parse(fileContents).value
-    const selectors = parseStyleAST(parsedData)
-    return acc.concat(selectors)
+    const parsed = parse(fileContents, { syntax: ext }).content
+    const nodes = []
+    parsed.traverse(node => {
+      if (shouldKeep.includes(node.type)) {
+        const thing = node.content.find(({ type }) => type === 'ident')
+        nodes.push(thing)
+      }
+    })
+
+    // const selectors = parseStyleAST(parsedData)
+    // return acc.concat(selectors)
   }, [])
 
   // Flatten the array.
@@ -55,22 +64,22 @@ function sanitizeArgs(arr) {
 }
 
 function parseStyleAST(arr) {
-  return arr.reduce((acc, { type, value }) => {
+  return arr.reduce((acc, { type, content }) => {
 
     // Trigger recursion for types that need it.
     if (shouldParse.includes(type)) {
-      return acc.concat(parseStyleAST(value))
+      return acc.concat(parseStyleAST(content))
 
     // Iterate through a type's values to extract selectors.
     } else if (shouldKeep.includes(type)) {
-      return value
-        .reduce((acc, { type, value }) => {
-          return (type === 'identifier' && !!value) ?  acc.concat(value) : acc
+      return content
+        .reduce((acc, { type, content }) => {
+          return (type === 'ident' && !!content) ?  acc.concat(content) : acc
         }, acc)
 
     // Concatenate a type's value if no iteration is needed.
-    } else if (type === 'identifier' && !!value) {
-      return acc.concat(value)
+    } else if (type === 'identifier' && !!content) {
+      return acc.concat(content)
 
     // No matches - acc is unchanged.
     // This allows us to skip filtering out falsy's later.
