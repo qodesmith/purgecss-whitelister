@@ -1,9 +1,11 @@
 const { parse } = require('scss-parser') // https://github.com/salesforce-ux/scss-parser
+const parse2 = require('gonzales-pe').parse
 const { readFileSync } = require('fs')
 const globAll = require('glob-all')
 
 const shouldParse = ['rule', 'selector', 'block']
 const shouldKeep = ['id', 'class', 'attribute']
+const shouldKeep2 = ['id', 'class', 'attribute', 'typeSelector']
 const exts = ['css', 'sass', 'scss', 'less']
 
 function makeWhitelist(filenames) {
@@ -16,10 +18,32 @@ function makeWhitelist(filenames) {
     const ext = filename.split('.').pop()
     if (!exts.includes(ext)) return acc
 
+    // File contents.
     const fileContents = readFileSync(filename, 'utf-8')
-    const parsedData = parse(fileContents).value
-    const selectors = parseStyleAST(parsedData)
-    return acc.concat(selectors)
+
+    // 1st try `scss-parser`.
+    try {
+      // throw 'nope'
+      const parsedData = parse(fileContents).value
+      const selectors = parseStyleAST(parsedData)
+      return acc.concat(selectors)
+
+    // 2nd try `gonzales-pe`.
+    } catch(e) {
+      const parsed = parse2(fileContents, { syntax: ext })
+      const nodes = []
+
+      // Built-in traversal method, no need to recursively
+      // traverse the tree, cherry pick, and flatten the results!
+      parsed.traverse(node => {
+        if (shouldKeep2.includes(node.type)) {
+          const thing = node.content.find(({ type }) => type === 'ident')
+          if (thing) nodes.push(thing.content)
+        }
+      })
+
+      return [...acc, ...new Set(nodes)]
+    }
   }, [])
 
   // Flatten the array.
