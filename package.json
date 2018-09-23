@@ -15,6 +15,6 @@
   "dependencies": {
     "glob-all": "^3.1.0",
     "gonzales-pe": "^4.2.3",
-    "scss-parser": "^1.0.0"
+    "scss-parser": "qodesmith/scss-parser"
   }
 }
