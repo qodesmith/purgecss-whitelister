@@ -1,4 +1,9 @@
-const { parse } = require('scss-parser') // https://github.com/salesforce-ux/scss-parser
+/*
+  Forked from - https://github.com/salesforce-ux/scss-parser
+  Forked because there's no active maintenance and npm audit errors were killing me.
+*/
+const { parse } = require('scss-parser')
+
 const parse2 = require('gonzales-pe').parse
 const { readFileSync } = require('fs')
 const globAll = require('glob-all')
@@ -6,7 +11,14 @@ const globAll = require('glob-all')
 const shouldParse = ['rule', 'selector', 'block']
 const shouldKeep = ['id', 'class', 'attribute']
 const shouldKeep2 = ['id', 'class', 'attribute', 'typeSelector']
-const exts = ['css', 'sass', 'scss', 'less']
+
+/*
+  The pcss file extension is a PostCSS extension.
+  They currently have no official documentation around it so
+  using it with this tool is completely at your own risk.
+  I mean, villages won't burn if you use it but your code might error out. YMMV.
+*/
+const exts = ['css', 'sass', 'scss', 'less', 'pcss']
 
 function makeWhitelist(filenames) {
   filenames = sanitizeArgs(filenames)

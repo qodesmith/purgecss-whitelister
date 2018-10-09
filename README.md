@@ -34,7 +34,9 @@ npm i purgecss-whitelister
 
 Pass either a string, a globby string, or an array of either, representing the location(s) of the file(s) you want to completely whitelist.
 
-**NOTE:** `purgecss-whitelister` will internally ignore any files that don't have the following extensions: `css`, `sass`, `scss`, `less`.
+**NOTE:** `purgecss-whitelister` will internally ignore any files that don't have the following extensions: `css`, `sass`, `scss`, `less`, or `pcss`.
+
+**NOTE:** Use the `pcss` extension with caution. It may or may not work. `pcss` is a PostCSS file extension but has no official documentation. It's been added to this tool for convenience but YMMV. If anyone has info on the `pcss` extension, I'm all ears.
 
 ```javascript
 const { resolve } = require('path')
