@@ -85,7 +85,7 @@ const webpackConfig = {
         resolve(resolve(), 'src/index.ejs')
       ]),
 
-      // `whiltelist` needed to ensure Typer classes stay in the bundle.
+      // `whitelist` needed to ensure Typer classes stay in the bundle.
       whitelist: whitelister('node_modules/typer-js/typer.css');,
       extractors: [
         {
