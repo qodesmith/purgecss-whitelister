@@ -1,9 +1,4 @@
-/*
-  Forked from - https://github.com/salesforce-ux/scss-parser
-  Forked because there's no active maintenance and npm audit errors were killing me.
-*/
 const { parse } = require('scss-parser')
-
 const parse2 = require('gonzales-pe').parse
 const { readFileSync } = require('fs')
 const globAll = require('glob-all')
@@ -35,7 +30,6 @@ function makeWhitelist(filenames) {
 
     // 1st try `scss-parser`.
     try {
-      // throw 'nope'
       const parsedData = parse(fileContents).value
       const selectors = parseStyleAST(parsedData)
       return acc.concat(selectors)
@@ -66,8 +60,7 @@ function makeWhitelist(filenames) {
 }
 
 function sanitizeArgs(arr) {
-  if (!Array.isArray(arr)) arr = [arr]
-  arr = arr.filter(Boolean)
+  arr = (Array.isArray(arr) ? arr : [arr]).filter(Boolean)
 
   // Avoids errors if an empty array, no arguments, or falsey things are passed.
   if (!arr.length) {
@@ -92,17 +85,15 @@ function sanitizeArgs(arr) {
 
 function parseStyleAST(arr) {
   return arr.reduce((acc, { type, value }) => {
-
     // Trigger recursion for types that need it.
     if (shouldParse.includes(type)) {
       return acc.concat(parseStyleAST(value))
 
     // Iterate through a type's values to extract selectors.
     } else if (shouldKeep.includes(type)) {
-      return value
-        .reduce((acc, { type, value }) => {
-          return (type === 'identifier' && !!value) ?  acc.concat(value) : acc
-        }, acc)
+      return value.reduce((acc, { type, value }) => (
+        (type === 'identifier' && !!value) ?  acc.concat(value) : acc
+      ), acc)
 
     // Concatenate a type's value if no iteration is needed.
     } else if (type === 'identifier' && !!value) {
