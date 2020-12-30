@@ -4,7 +4,7 @@
   "description": "A utility for creating whitelists of CSS selectors for use with Purgecss.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --detectOpenHandles"
   },
   "repository": {
     "type": "git",
@@ -16,5 +16,8 @@
     "glob-all": "^3.2.1",
     "gonzales-pe": "^4.3.0",
     "scss-parser": "^1.0.4"
+  },
+  "devDependencies": {
+    "jest": "^26.6.3"
   }
 }

@@ -1,0 +1,13 @@
+.class1 { color: red; }
+.class2 { color: rgb(0,255,0); }
+.class3 { color: #00f; }
+
+#id1 { color: red; }
+#id2 { color: rgb(0,255,0); }
+#id3 { color: #00f; }
+
+div { color: white; }
+span { color: black; }
+
+[data-test="whitelister"] { display: block; }
+[data-nope="syke"] { display: none; }
